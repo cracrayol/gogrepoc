@@ -1231,7 +1231,7 @@ def fetch_file_info(d, fetch_md5,save_md5_xml,updateSession):
         else:
             d.updated = email.utils.parsedate_to_datetime(d.raw_updated).isoformat() #Standardize
 
-def filter_downloads(out_list, downloads_list, lang_list, os_list,save_md5_xml,updateSession, fallbacklang):
+def filter_downloads(out_list, downloads_list, lang_list, os_list,save_md5_xml,updateSession, fallbacklang, fallbackIdx = 0):
     """filters any downloads information against matching lang and os, translates
     them, and extends them into out_list
     """
@@ -1331,8 +1331,8 @@ def filter_downloads(out_list, downloads_list, lang_list, os_list,save_md5_xml,u
                                 #None worked so go with the canonical link
                                 error("Could not fetch file info so using canonical link: %s" % href_ds[0][0].href)
                                 filtered_downloads.append(href_ds[0][0])
-    if not len(filtered_downloads) and not fallbacklang is None:
-        filter_downloads(out_list, downloads_list, [fallbacklang], os_list,save_md5_xml,updateSession, None)
+    if not len(filtered_downloads) and not fallbacklang is None and len(fallbacklang) > fallbackIdx:
+        filter_downloads(out_list, downloads_list, [fallbacklang[fallbackIdx]], os_list,save_md5_xml,updateSession, fallbacklang, fallbackIdx + 1)
     else:
         out_list.extend(filtered_downloads)
 
@@ -1580,7 +1580,7 @@ def process_argv(argv):
     g3 = g1.add_mutually_exclusive_group()
     g3.add_argument('-lang', action=storeExtend, help='game language(s)', nargs='*', default=[])
     g3.add_argument('-skiplang', action='store', help='skip game language(s)', nargs='*', default=[])
-    g1.add_argument('-fallbacklang', action='store', help='fallback language', nargs='?', default=None)
+    g1.add_argument('-fallbacklang', action='store', help='fallback language', nargs='*', default=None)
     g1.add_argument('-skiphidden',action='store_true',help='skip games marked as hidden')
     g1.add_argument('-installers', action='store', choices = ['standalone','both'], default = 'standalone',  help='GOG Installer type to use: standalone or both galaxy and standalone. Default: standalone (Deprecated)')    
     g4 = g1.add_mutually_exclusive_group()  # below are mutually exclusive
